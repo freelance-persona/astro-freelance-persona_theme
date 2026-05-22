@@ -1,97 +1,145 @@
-# Optimize Bootstrap CSS & Font Bundle Size
+# Advanced Performance Optimization Plan
 
-Importing the entire Bootstrap framework in `main.scss` results in a large render-blocking CSS chunk (317 kB). Because this chunk contains shared styles, Vite links it on every single page, creating a massive initial paint delay.
+We have successfully reduced the base theme CSS bundle size to just **7.0 kB** by modularizing the Bootstrap SCSS imports and restricting Fontsource styles to the `latin` subset. 
 
-Previously, attempting to reduce this size by importing only the bare minimum grid and typography modules resulted in broken styles—specifically, the dark theme "turned super ugly." This occurred because the site actively relies on Bootstrap components like buttons, dropdowns (for the theme toggle), badges, forms, and helper utilities. Omitting these modules caused the elements to lose their base styles, padding, and dark mode colorings.
-
-Additionally, importing default Fontsource CSS (`400.css` etc.) includes `@font-face` declarations for all subsets (Cyrillic, Vietnamese, etc.), which unnecessarily inflates the CSS bundle size. We will restrict this to the `latin` subset across both `BaseLayout.astro` and the starter template's `fonts.ts` file.
+This plan implements **Round 2 of performance optimizations**, targeting the critical rendering path, resource leaks, font loading bottlenecks, and Largest Contentful Paint (LCP) priority to achieve perfect mobile performance scores.
 
 ## Proposed Changes
 
-### Styles
-
 ---
 
-#### [MODIFY] [main.scss](file:///home/fabio/Documents/Programming/Website/Astro/astro_freelance-persona_theme/theme/src/freelance-persona/styles/main.scss)
+### 1. Dynamic KaTeX Loading & CSS Leak Prevention
 
-Replace the full `@use "bootstrap/scss/bootstrap"` import with targeted imports. We will include the modules necessary for the layout, plus the specific components used in the theme (forms, buttons, transitions, dropdown, badge) and the helper classes required by `utilities/api` and `.text-bg-*` classes.
+#### [MODIFY] [KatexLoader.astro](file:///home/fabio/Documents/Programming/Website/Astro/astro_freelance-persona_theme/theme/src/freelance-persona/components/KatexLoader.astro)
 
-```scss
-// 2. Vendor & Context Setup
-@use "theme-context" as *;
+Currently, `KatexLoader.astro` statically imports KaTeX CSS and the auto-render library:
+```typescript
+import 'katex/dist/katex.min.css';
+import renderMathInElement from 'katex/dist/contrib/auto-render';
+```
+Because this component is statically imported in `BaseLayout.astro`, Vite parses it during the build phase and extracts `katex.min.css` (**29.29 kB**) into the main critical layout CSS. This forces every single page (including the homepage) to download and block rendering on KaTeX styles, even when `tex` is `false` (default).
 
-// Selected Bootstrap modules to reduce bundle size
-@import "bootstrap/scss/root";
-@import "bootstrap/scss/reboot";
-@import "bootstrap/scss/type";
-@import "bootstrap/scss/images";
-@import "bootstrap/scss/containers";
-@import "bootstrap/scss/grid";
-@import "bootstrap/scss/forms";
-@import "bootstrap/scss/buttons";
-@import "bootstrap/scss/transitions";
-@import "bootstrap/scss/dropdown";
-@import "bootstrap/scss/badge";
-@import "bootstrap/scss/helpers";
-@import "bootstrap/scss/utilities/api";
+To solve this, we will load both the stylesheet and the rendering library **dynamically on the client side** using Vite's dynamic import capabilities. This will completely remove KaTeX from the critical CSS bundle and split it into a separate lazy-loaded chunk that is only fetched when `<KatexLoader />` actually renders:
+
+```astro
+<script>
+  // Dynamically load KaTeX CSS and the auto-render library on the client side.
+  // This prevents KaTeX from leaking into the layout's critical rendering path.
+  Promise.all([
+    import('katex/dist/katex.min.css'),
+    import('katex/dist/contrib/auto-render')
+  ]).then(([_, { default: renderMathInElement }]) => {
+    const options = {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false},
+        {left: '\\(', right: '\\)', display: false},
+        {left: '\\[', right: '\\]', display: true}
+      ],
+      throwOnError : false
+    };
+
+    function init() {
+      renderMathInElement(document.body, options);
+    }
+
+    // Run immediately when this component is mounted
+    init();
+
+    // Re-run on View Transitions
+    document.addEventListener('astro:page-load', init);
+  });
+</script>
 ```
 
-### Layouts
+---
+
+### 2. Conditional KaTeX in Blog Schema & Templates
+
+#### [MODIFY] [content.config.ts](file:///home/fabio/Documents/Programming/Website/Astro/astro_freelance-persona_theme/theme/src/freelance-persona/content.config.ts)
+
+We will extend the `blog` collection schema to support an optional `tex` boolean field. By default, posts do not need KaTeX, so they shouldn't trigger loading the heavy KaTeX JS and CSS.
+
+```typescript
+    tags: z.array(z.string()),
+    tex: z.boolean().optional(),
+```
+
+#### [MODIFY] [BlogPostTemplate.astro](file:///home/fabio/Documents/Programming/Website/Astro/astro_freelance-persona_theme/theme/src/freelance-persona/components/templates/BlogPostTemplate.astro)
+
+Update the layout instantiation to pass `tex={post.data.tex || false}` instead of hardcoding `tex={true}`. This ensures that the KaTeX client script is **never loaded** on pages that do not explicitly require math equations.
+
+```astro
+<BaseLayout title={post.data.title} navType="page" tex={post.data.tex || false}>
+```
 
 ---
+
+### 3. Elevate Hero Background LCP Priority
+
+#### [MODIFY] [Hero.astro](file:///home/fabio/Documents/Programming/Website/Astro/astro_freelance-persona_theme/theme/src/freelance-persona/components/Hero.astro)
+
+The hero background image is the primary Largest Contentful Paint (LCP) element on the homepage. We will add `fetchpriority="high"` to tell the browser to request this asset immediately, speeding up FCP/LCP metrics:
+
+```astro
+        <Image
+          src={finalImage}
+          alt="Background"
+          class="hero-bg"
+          width={1920}
+          height={1080}
+          format="webp"
+          loading="eager"
+          fetchpriority="high"
+        />
+```
+
+---
+
+### 4. Preload Critical Web Fonts
 
 #### [MODIFY] [BaseLayout.astro](file:///home/fabio/Documents/Programming/Website/Astro/astro_freelance-persona_theme/theme/src/freelance-persona/layouts/BaseLayout.astro)
 
-Change the Fontsource imports from the generic files (which include all unicode subsets) to the `latin` specific subset to reduce the `@font-face` payload.
+Fonts are normally discovered late in the browser's rendering cycle (only after the CSSOM is built). To eliminate FOUT/FOIT and improve text rendering speed, we will preload Poppins, Raleway, and Roboto regular weights inside the `<head>` of `BaseLayout.astro`.
+
+We will retrieve the dynamic, build-hashed URLs of the `.woff2` font files using Vite's `?url` suffix, ensuring they remain correct through updates and caching:
 
 ```astro
-// Font imports
-import "@fontsource/raleway/latin-400.css";
-import "@fontsource/raleway/latin-700.css";
-```
-
-### Fonts Config
-
+---
+// src/freelance-persona/layouts/BaseLayout.astro
+...
+// Font preloading links using Vite ?url suffix
+import raleway400Url from "@fontsource/raleway/files/raleway-latin-400-normal.woff2?url";
+import poppins400Url from "@fontsource/poppins/files/poppins-latin-400-normal.woff2?url";
+import roboto400Url from "@fontsource/roboto/files/roboto-latin-400-normal.woff2?url";
 ---
 
-#### [MODIFY] [fonts.ts](file:///home/fabio/Documents/Programming/Website/Astro/astro_freelance-persona_theme/theme/starter/src/fonts.ts)
-
-Change all Fontsource imports to target only the `latin` subsets for Poppins, Raleway, and Roboto. This is critical because the home page (`index.astro`) imports `fonts.ts`, and importing the generic files would bypass the font optimizations.
-
-```typescript
-// --- Poppins (Headings) ---
-import '@fontsource/poppins/latin-300.css';
-import '@fontsource/poppins/latin-400.css';
-import '@fontsource/poppins/latin-500.css';
-import '@fontsource/poppins/latin-600.css';
-import '@fontsource/poppins/latin-700.css';
-
-// --- Raleway (Navigation) ---
-import '@fontsource/raleway/latin-300.css';
-import '@fontsource/raleway/latin-400.css';
-import '@fontsource/raleway/latin-500.css';
-import '@fontsource/raleway/latin-600.css';
-import '@fontsource/raleway/latin-700.css';
-
-// --- Roboto (Body) ---
-import '@fontsource/roboto/latin-300.css';
-import '@fontsource/roboto/latin-300-italic.css';
-import '@fontsource/roboto/latin-400.css';
-import '@fontsource/roboto/latin-400-italic.css';
-import '@fontsource/roboto/latin-500.css';
-import '@fontsource/roboto/latin-500-italic.css';
-import '@fontsource/roboto/latin-700.css';
-import '@fontsource/roboto/latin-700-italic.css';
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    
+    <!-- Preload critical fonts for immediate rendering -->
+    <link rel="preload" href={raleway400Url} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={poppins400Url} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={roboto400Url} as="font" type="font/woff2" crossorigin />
+    ...
 ```
+
+---
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `bun run build` at the workspace root to compile the playground.
-- Check the size of the compiled CSS files in `playground/dist/_astro/` using `eza -lh`. Verify that the main CSS chunk size drops significantly compared to the baseline.
-- Run `bun run test --reporter=list` to verify that layout remains correct and there are no visual regressions.
+1. Run `bun run check` to ensure Astro/TypeScript schemas are perfectly aligned.
+2. Run `bun run build` at the workspace root to compile the playground.
+3. Check compiled CSS files in `playground/dist/_astro/` using `eza -lh`. Verify that:
+   - `KatexLoader.css` is no longer generated as a critical render-blocking file.
+   - Homepage `index.html` **does not** reference or load any KaTeX CSS or JS.
+   - Standard blog posts **do not** reference or load any KaTeX CSS or JS.
+4. Run the Playwright test suite using `bun run test --reporter=list` to confirm all existing end-to-end tests continue to pass perfectly without any regressions.
 
 ### Manual Verification
-- Run `bun run playground:setup && bun run dev`
-- Open the preview and toggle the dark theme to ensure buttons, forms, badges, and dropdown menus maintain their expected appearance and don't break.
-- Verify that text renders correctly using the specified fonts.
+1. Run `bun run playground:setup && bun run dev` to start the local dev playground.
+2. Verify visual appearance of the homepage and a blog post to ensure fonts render instantly.
+3. Verify that any blog post with math equations successfully renders KaTeX symbols.
