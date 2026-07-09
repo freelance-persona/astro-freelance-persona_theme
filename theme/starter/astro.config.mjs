@@ -7,6 +7,7 @@
 import { defineConfig } from 'astro/config';
 import icon from 'astro-icon';
 import sitemap from '@astrojs/sitemap';
+import unocssPostcss from '@unocss/postcss';
 import freelancePersona from 'astro-freelance-persona_theme';
 
 export default defineConfig({
@@ -27,4 +28,11 @@ export default defineConfig({
     }),
     freelancePersona()
   ],
+  vite: {
+    css: {
+      postcss: {
+        plugins: [unocssPostcss()],
+      },
+    },
+  },
 })
