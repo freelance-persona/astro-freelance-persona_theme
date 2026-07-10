@@ -27,6 +27,7 @@
     "include": [
         "src/**/*.ts",
         "src/**/*.astro",
+        "src/**/*.d.ts",
         "testing/**/*.ts",
         "playwright.config.ts"
     ]

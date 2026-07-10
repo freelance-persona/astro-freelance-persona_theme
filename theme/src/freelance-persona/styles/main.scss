@@ -10,13 +10,10 @@
 // NOTE: Fonts are now imported in layouts/BaseLayout.astro via JS 
 // to ensure correct loading in Yarn PnP environments.
 
-// 2. Vendor & Context Setup
-@use "theme-context" as *;
-@use "bootstrap-custom";
+// 2. Reset & UnoCSS
+@use "@unocss/reset/normalize.css" as *;
 
 // 3. Theme Core Styles
-
-// 4. Theme Core Styles
 @use "base";
 @use "preloader";
 @use "plain";

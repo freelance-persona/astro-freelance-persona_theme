@@ -6,7 +6,6 @@
 
 // src/styles/_theme-context.scss
 // Public bridge for theme modules
-
-@forward "bootstrap-core";
+// Bootstrap core removed - using UnoCSS utilities instead
 
 // Theme-specific globals can go here

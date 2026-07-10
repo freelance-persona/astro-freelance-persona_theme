@@ -11,24 +11,35 @@
     "test": "playwright test",
     "astro": "astro"
   },
-  "dependencies": {
+"dependencies": {
     "astro-freelance-persona_theme": "^0.1.0-alpha.8",
     "astro": "^7.0.0",
     "astro-icon": "^1.1.5",
     "@astrojs/check": "^0.9.6",
     "@astrojs/mdx": "^7.0.0",
+    "@astrojs/sitemap": "^3.7.3",
     "@iconify-json/bi": "^1.2.7",
     "@iconify-json/academicons": "^1.2.4",
+    "@unocss/reset": "^66.7.4",
     "@fontsource/poppins": "^5.2.7",
     "@fontsource/raleway": "^5.2.8",
     "@fontsource/roboto": "^5.2.9",
-    "typescript": "^6.0.0"
+    "typescript": "^6.0.0",
+    "unocss": "^66.7.4",
+    "@unocss/preset-uno": "^66.7.4",
+    "@unocss/preset-attributify": "^66.7.4",
+    "@unocss/preset-icons": "^66.7.4",
+    "@unocss/transformer-directives": "^66.7.4",
+    "@unocss/transformer-variant-group": "^66.7.4",
+    "@unocss/astro": "^66.7.4",
+    "@unocss/postcss": "^66.7.4"
   },
   "devDependencies": {
     "@playwright/test": "^1.40.0",
     "js-yaml": "^5.0.0",
     "@types/js-yaml": "^4.0.9",
     "sass-embedded": "^1.0.0",
-    "sharp": "^0.35.0"
+    "sharp": "^0.35.0",
+    "vite-plugin-compression": "^0.5.1"
   }
 }
