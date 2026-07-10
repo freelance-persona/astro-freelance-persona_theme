@@ -12,15 +12,9 @@
  * Usage in freelance-persona.config.ts:
  *   import { astroMajorVersion } from 'astro-freelance-persona_theme/utils/buildInfo';
  *   title: `freelance-persona — an Astro ${astroMajorVersion} Theme`,
- *
- * Usage in about.md frontmatter (via token replacement in AboutSection):
- *   subtitle:
- *     - "Astro {{astro_major}}+"
- *     - "Bootstrap {{bootstrap_major}}"
  */
 
 import astroPkg from 'astro/package.json' with { type: 'json' };
-import bootstrapPkg from 'bootstrap/package.json' with { type: 'json' };
 
 // --- Astro ---
 
@@ -33,16 +27,12 @@ export const astroMajorVersion: string = astroPkg.version.split('.')[0];
 /** Major.minor version, e.g. "6.3" */
 export const astroMinorVersion: string = astroPkg.version.split('.').slice(0, 2).join('.');
 
-// --- Bootstrap ---
+// --- UnoCSS ---
 
-/** Full semver string, e.g. "5.3.8" */
-export const bootstrapVersion: string = bootstrapPkg.version;
-
-/** Major version, e.g. "5" */
-export const bootstrapMajorVersion: string = bootstrapPkg.version.split('.')[0];
-
-/** Major.minor version, e.g. "5.3" */
-export const bootstrapMinorVersion: string = bootstrapPkg.version.split('.').slice(0, 2).join('.');
+/** Placeholder for UnoCSS version (no longer tracking Bootstrap) */
+export const unoCssVersion: string = '66.7.4';
+export const unoCssMajorVersion: string = '66';
+export const unoCssMinorVersion: string = '66.7';
 
 // --- Token map for content interpolation ---
 
@@ -55,9 +45,9 @@ export const buildTokens: Record<string, string> = {
   'astro_version': astroVersion,
   'astro_major': astroMajorVersion,
   'astro_minor': astroMinorVersion,
-  'bootstrap_version': bootstrapVersion,
-  'bootstrap_major': bootstrapMajorVersion,
-  'bootstrap_minor': bootstrapMinorVersion,
+  'unocss_version': unoCssVersion,
+  'unocss_major': unoCssMajorVersion,
+  'unocss_minor': unoCssMinorVersion,
 };
 
 /**

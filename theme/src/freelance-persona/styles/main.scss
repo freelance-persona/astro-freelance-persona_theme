@@ -13,13 +13,7 @@
 // 2. Reset & UnoCSS
 @use "@unocss/reset/normalize.css" as *;
 
-// 3. Vendor & Context Setup
-@use "theme-context" as *;
-@use "bootstrap-custom";
-
 // 3. Theme Core Styles
-
-// 4. Theme Core Styles
 @use "base";
 @use "preloader";
 @use "plain";
