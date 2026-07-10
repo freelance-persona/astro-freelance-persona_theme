@@ -1,5 +1,20 @@
 # astro-freelance-persona_theme
 
+## 0.1.0
+
+### Minor Changes
+
+- 97fef08: Implement dynamic build-time version introspection and token replacement in the footer, qualifications, and features.
+- fddbe1f: Bump to Astro7 and small UI fixes
+- 9b86482: Initial alpha release
+- f96b79a: Fix UI clipping issue, and made favicon theme aware.
+
+### Patch Changes
+
+- 551266f: fix(deps): resolve KaTeX version mismatch dynamically via Rehype wrapper
+- 9490730: Preload above-the-fold hero background and blog post thumbnail images in HTML head, reduce preloader fadeout transition from 600ms to 250ms, and adjust scroll animations duration from 800ms to 500ms for snappier mobile performance.
+- ecac332: Optimize mobile PageSpeed score by preloading critical fonts, speeding up the preloader fadeout, and initializing scroll animations synchronously.
+
 ## 0.1.0-alpha.9
 
 ### Minor Changes
