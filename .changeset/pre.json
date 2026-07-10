@@ -1,11 +1,12 @@
 {
-  "mode": "pre",
-  "tag": "alpha",
+  "mode": "exit",
+  "tag": "beta",
   "initialVersions": {
-    "my-freelance-portfolio": "0.0.1",
-    "astro-freelance-persona_theme": "0.0.1"
+    "astro-freelance-persona_theme": "0.1.0-alpha.9",
+    "my-freelance-portfolio": "0.1.0-alpha.0"
   },
   "changesets": [
+    "beta-release",
     "dynamic-version-introspection",
     "fix-katex-mismatch",
     "fruity-cases-see",
