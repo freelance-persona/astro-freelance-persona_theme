@@ -19,6 +19,31 @@ import fs from 'fs';
 import { mathjaxFontsPlugin } from './plugins/mathjaxFontsPlugin';
 import { virtualConfigPlugin } from './plugins/virtualConfig';
 
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self' data:",
+  "img-src 'self' data: blob:",
+  "connect-src 'self'",
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join('; ');
+
+const SECURITY_HEADERS = {
+  'Content-Security-Policy': CSP,
+  'X-Frame-Options': 'DENY',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), display-capture=()',
+  'X-DNS-Prefetch-Control': 'off',
+  'X-Download-Options': 'noopen',
+  'X-Permitted-Cross-Domain-Policies': 'none',
+  'Cross-Origin-Opener-Policy': 'same-origin',
+  'Cross-Origin-Resource-Policy': 'same-origin',
+};
+
 export default function freelancePersona(): AstroIntegration {
   return {
     name: 'astro-freelance-persona',
@@ -144,6 +169,15 @@ export default function freelancePersona(): AstroIntegration {
               noExternal: ['astro-freelance-persona_theme', '@iconify-json/bi', '@iconify-json/academicons', 'astro-icon']
             }
           },
+        });
+      },
+      'astro:server:setup': async ({ server }) => {
+        // Security headers for preview/development server
+        server.middlewares.use((_req, res, next) => {
+          Object.entries(SECURITY_HEADERS).forEach(([key, value]) => {
+            res.setHeader(key, value);
+          });
+          next();
         });
       },
     },
