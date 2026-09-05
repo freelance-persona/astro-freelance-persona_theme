@@ -26,7 +26,7 @@
     "@fontsource/poppins": "^5.2.7",
     "@fontsource/raleway": "^5.2.8",
     "@fontsource/roboto": "^5.2.9",
-    "typescript": "^6.0.0"
+    "typescript": "^7.0.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.40.0",
@@ -36,6 +36,6 @@
   },
   "overrides": {
     "lightningcss": "^1.33.0",
-    "typescript": "^6.0.0"
+    "typescript": "^7.0.0"
   }
 }

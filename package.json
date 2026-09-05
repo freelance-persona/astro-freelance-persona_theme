@@ -29,7 +29,7 @@
   },
   "overrides": {
     "lightningcss": "1.33.0",
-    "typescript": "^6.0.0"
+    "typescript": "^7.0.0"
   },
   "dependencies": {
     "@iconify-json/academicons": "^1.2.4",
