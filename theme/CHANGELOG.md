@@ -1,5 +1,11 @@
 # astro-freelance-persona_theme
 
+## 0.1.1-beta.6
+
+### Patch Changes
+
+- 07187c3: Home desktop sidenav: the theme switcher now reads as a quiet utility cluster — its icon rests in the muted text color (`--text-muted`), dimmed further in light mode via a scoped `--nav-quiet-color` token. Hover and menu-open keep the established white-on-accent look. Mobile drawer and inner-page top nav are unchanged.
+
 ## 0.1.1-beta.5
 
 ### Patch Changes
