@@ -1,5 +1,13 @@
 # astro-freelance-persona_theme
 
+## 0.1.1-beta.6
+
+### Patch Changes
+
+- f1b8422: New nav font-size dial: `fonts.sizes.nav` maps to `--nav-font-size` (default 0.9375rem) and now drives the home sidenav, inner top nav, and dropdown label sizes. Starter demo bumps the nav scale for legibility: pill height / collapsed width `3.75rem` (was 3.5rem), collapsed sidebar width `9.375rem` (was 8.75rem), expanded pill width `11.25rem` (was 10.35rem), nav label font `1rem` (was 0.9375rem).
+- 07187c3: Home desktop sidenav: the theme switcher now reads as a quiet utility cluster — its icon rests in the muted text color (`--text-muted`), dimmed further in light mode via a scoped `--nav-quiet-color` token. Hover and menu-open keep the established white-on-accent look. Mobile drawer and inner-page top nav are unchanged.
+- cb2cb68: Fix the hero typing font chain: `.hero p` now falls back to the mono role token `--font-mono` (was swallowing the nav face, which made `hero.css`'s mono default dead code and broke sites that set `fonts.monospace` without a frontmatter override). Raw in-code token default for `--font-mono` becomes deliberately conspicuous (`Comic Sans MS` stack) per the README Level-4 manifesto rule. Documentation and decision docs ride along: heading-regimes one-pager, updated Level-4 wording.
+
 ## 0.1.1-beta.5
 
 ### Patch Changes
