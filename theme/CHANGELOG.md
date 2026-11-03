@@ -1,5 +1,12 @@
 # astro-freelance-persona_theme
 
+## 0.1.1-beta.8
+
+### Patch Changes
+
+- 5d16c76: Fixes the Expressive Code copy button in two ways. On hover-capable devices the theme's `scale(0.55)` de-emphasis transform was global although it was tuned against the touch-layout geometry only: EC pairs `@media (hover: hover)` with its narrow 2rem hover-revealed button, and the theme's responsive root font size (<16px on large screens) shrinks that rem further, so desktop buttons rendered as ~12px specks instead of their native EC sizing. The shrink is now scoped to `@media (hover: none)` — mirroring EC's own interaction discrimination (including non-hover desktop-sized devices like landscape tablets/kiosks, which permanently show the full 2.5rem button in the reading flow) — so touch layouts keep their shipped look exactly while desktop gets the native ~21px hover-revealed button. Separately, the button's outline ring in dark mode was as opaque as in light (60%, a light-mode dial that the dark cases only overrode for color, not opacity) and read too bright on dark code backgrounds; the dark cases now dial the outline down to 30% via a `--copy-btn-outline-opa-dark` variable in both dark scenarios (OS-dark with untouched chooser, and forced dark).
+- 5bd2786: The hero typewriter no longer clips mid-word on touch layouts. The typing script pins an inline `min-width` on the installed-text container to the longest typing item's width (desktop's CLS-guard: desktop renders each item on one line), but the ≤1023px block only overrides white-space — the forced width survived there, made the container wider than the phone, and the hero's `overflow: hidden` then sliced wrapped line tails (visibly: text cut off mid-item, then wrapping to the next line with letters missing — most obvious with the starter sample's "responsive and lightweight theme for resume" item). The mobile block now neutralizes the inline lock (`min-width: 0 !important`, beating the inline style) and pins `overflow-wrap: normal`, so wrapping only happens at spaces and hyphenations — a word is never split, and the longest single *word* of an item must fit the mobile typing size (contract now documented in the template's and consumers' `hero.md`; the starter sample's longest word `lightweight` fits trivially). Desktop behavior is untouched by design: the nowrap mode and the JS lock keep preventing typewriter reflow there.
+
 ## 0.1.1-beta.7
 
 ### Patch Changes
