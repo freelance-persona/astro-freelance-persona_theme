@@ -1,5 +1,11 @@
 # astro-freelance-persona_theme
 
+## 0.1.1-beta.9
+
+### Patch Changes
+
+- 93705b6: bump deps
+
 ## 0.1.1-beta.8
 
 ### Patch Changes
